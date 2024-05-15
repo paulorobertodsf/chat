@@ -3,16 +3,17 @@ class Message
 
   def initialize(text, user, receiver)
     @text ||= text
-    @author ||= user
+    @author ||= Marshal.dump(user)
     @receiver ||= receiver
-    @time_create ||= Time.new
+    @time_create ||= Marshal.dump(Time.new)
   end
 
-  def getmessage
+  def get_message
     message = {
       "text" => @text,
       "author" => @author,
-      "time_create" => @time_create
+      "time_create" => @time_create,
+      "is_command" => @text[0] == '/'
     }
     return message
   end
