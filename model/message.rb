@@ -3,9 +3,9 @@ class Message
 
   def initialize(text, user, receiver)
     @text ||= text
-    @author ||= Marshal.dump(user)
+    @author ||= user
     @receiver ||= receiver
-    @time_create ||= Marshal.dump(Time.new)
+    @time_create ||= Time.new
   end
 
   def get_message

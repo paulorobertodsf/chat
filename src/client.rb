@@ -1,7 +1,6 @@
 require 'socket'
 require './model/models'
 
-
 class Client
   def initialize(ip, port, username)
     @client = TCPSocket.new(ip, port)
@@ -28,8 +27,7 @@ class Client
         message = gets.chomp
         message = Message.new(message, @user, '0')
         message_serial = Marshal.dump(message.get_message)
-        puts message_serial
-        @client.puts(message_serial + '\0')
+        @client.puts(message_serial + "\x17")
       end
     end
     return send

@@ -1,10 +1,12 @@
 require 'socket'
 require './command/command'
+require './model/models'
 require_relative 'invoker'
 
 class Server
   def initialize(ip, port)
     @server = TCPServer.new(ip, port)
+    @invoker = Invoker.new
   end
 
   public
@@ -19,16 +21,32 @@ class Server
   def connect_client(client)
     Thread.new do
       puts "#{client.peeraddr[2]} conectado."
-      process_messages(client)
+      process_serial(client)
     end
   end
 
-  def process_messages(client)
+  def process_message(message)
+    if message['is_command']
+      command = process_command(message)
+      command_name = command['command']
+      args = command['args']
+
+      execute_command(command_name, message, args)
+      return
+    end
+    puts message['text']
+  end
+
+  def process_serial(client)
     serial = ''
-    while char = client.getc
+
+    while char = client.gets
       serial << char
-      if serial[-2..-1] == '\0'
-        
+      if serial.include? "\x17"
+        message = Marshal.load(serial)
+        serial = ''
+
+        process_message(message)
       end
     end
   end
@@ -46,28 +64,13 @@ class Server
   end
 
   def execute_command(command_name, message, args)
-    invoker = Invoker.new
-    invoker.commands[command_name].execute(message, args)
+    begin
+      @invoker.commands[command_name].execute(message, args)
+    rescue NoMethodError => e
+      puts 'Comando invalido'
+    end
   end
 end
 
 server = Server.new('10.1.1.21', 3001)
 server.start
-
-
-=begin
-      while line = client.gets
-      puts line
-      message = Marshal.load(line)
-      puts message
-      if message['is_command']
-        command = process_command(message)
-        command_name = command['command']
-        args = command['args']
-
-        execute_command(command_name, message,args)
-        next
-      end
-      puts line
-    end
-=end

@@ -1,6 +1,6 @@
 class Invoker
   attr_reader :commands
-  
+
   def initialize
     import_commands
     @commands = {
