@@ -4,7 +4,8 @@ class Invoker
   def initialize
     import_commands
     @commands = {
-      'connect' => Connect.new
+      'help' => Help.new,
+      'poke' => Pokemon.new,
     }
   end
 

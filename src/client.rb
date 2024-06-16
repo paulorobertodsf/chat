@@ -44,5 +44,5 @@ class Client
   end
 end
 
-client = Client.new '10.1.1.21', 3001, 'Teste'
+client = Client.new 'localhost', 3001, 'Teste'
 client.start

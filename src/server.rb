@@ -25,13 +25,13 @@ class Server
     end
   end
 
-  def process_message(message)
+  def process_message(message, client)
     if message['is_command']
       command = process_command(message)
       command_name = command['command']
       args = command['args']
 
-      execute_command(command_name, message, args)
+      execute_command(command_name, message, args, client)
       return
     end
     puts message['text']
@@ -46,7 +46,7 @@ class Server
         message = Marshal.load(serial)
         serial = ''
 
-        process_message(message)
+        process_message(message, client)
       end
     end
   end
@@ -63,14 +63,23 @@ class Server
     return hash_command
   end
 
-  def execute_command(command_name, message, args)
+  def execute_command(command_name, message, args, client)
     begin
-      @invoker.commands[command_name].execute(message, args)
+      if @invoker.commands[command_name]
+        @invoker.commands[command_name].execute(client, message, args)
+      else
+        raise NoMethodError
+      end
     rescue NoMethodError => e
       puts 'Comando invalido'
+      send_message(client, "Comando invalido: #{command_name}")
     end
+  end
+
+  def send_message(client, message_text)
+    client.puts(message_text)
   end
 end
 
-server = Server.new('10.1.1.21', 3001)
+server = Server.new('localhost', 3001)
 server.start
